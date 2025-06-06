@@ -53,9 +53,13 @@ def main():
 
     model_dir = "model_interpolate_intermediate_flow"
     model_checkpoint_callback = ModelCheckpoint(
-        model_dir, filename="inter-rvq-unet", save_top_k=1, mode="min"
+        model_dir,
+        filename="inter-rvq-unet",
+        save_top_k=1,
+        mode="min",
+        monitor="val_recon_loss",
     )
-    early_stopping_callback = EarlyStopping("val_recon_loss", patience=5, mode="min")
+    early_stopping_callback = EarlyStopping("val_recon_loss", patience=3, mode="min")
 
     trainer = pl.Trainer(
         max_epochs=max_epochs,

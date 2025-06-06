@@ -16,7 +16,7 @@ def main():
     config = {
         "resvq_embeddings": 256,  # 256,
         "num_embeddings": [256, 256],  # 256,
-        "codebook_size": 64,  # 16,
+        "codebook_size": 16,  # 16,
         "interpolate_alpha": 0,
     }
 
@@ -25,11 +25,20 @@ def main():
     codebook_size = config["codebook_size"]
     interpolate_alpha = config["interpolate_alpha"]
 
+    # image to evaluate on
+    image_names = ["1104", "1128", "1152", "1176", "1200", "1224"]
+
     val_dataset = InterpolateIntermediateDataset(
-        h5py_file="/Users/darylfung/Documents/Work/Nicosia/probe-dimitris/Flow project/data/flow/flow.h5",
+        h5py_file="/Users/darylfung/Documents/Work/Nicosia/Flow project/data/flow/flow.h5",
         is_train=False,
         test_size=test_size,
     )
+
+    image_indices = [
+        index
+        for index, filename in enumerate(val_dataset.filenames_dict["coarse"])
+        if any(name_part in filename for name_part in image_names)
+    ]
     # val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=10, shuffle=False)
 
     model = RVQUNetLightning.load_from_checkpoint(
@@ -47,8 +56,7 @@ def main():
     with torch.no_grad():
         model.eval()
 
-        steps = len(val_dataset) // 5
-        batches = [val_dataset[i] for i in range(0, len(val_dataset), steps)]
+        batches = [val_dataset[i] for i in image_indices]
         data = torch.stack([batch[0] for batch in batches])
         intermediate = torch.stack([batch[1] for batch in batches])
         target = torch.stack([batch[2] for batch in batches])

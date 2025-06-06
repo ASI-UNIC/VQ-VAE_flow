@@ -59,7 +59,7 @@ def create_h5_dataset(filenames: str, output_filepath: str, width: int, height: 
             else:
                 hf[h5_name].resize((hf[h5_name].shape[0] + flow.shape[0]), axis = 0)
                 hf[h5_name][-flow.shape[0]:] = flow
-
+    
 
 def create_h5_latent_dataset(filenames: str, output_filepath: str, model_path: str, width: int, height: int,channel: int, batch_size: int, h5_name: str = 'latent'):
 
@@ -127,6 +127,9 @@ def create_interpolate_dataset(image_folder, intermediate_folder, target_folder,
     create_h5_dataset(filenames, output_filepath, width, height, channel, batch_size, 'flow')
     create_h5_dataset(intermediate_filenames, output_filepath, width, height, channel, batch_size, 'intermediate_flow')
     create_h5_dataset(target_filenames, output_filepath, width, height, channel, batch_size, 'target_flow')
+
+    filenames_dict = {'coarse': filenames, 'intermediate': intermediate_filenames, 'fine': target_filenames}
+    np.save(output_filepath.replace('.h5', '_filenames.npy'), filenames_dict)
 
 def create_train_dataset(image_folder: str, target_folder: str, model_path: str, output_filepath: str, test_size:float = 0.1):
     filenames = glob(os.path.join(image_folder, "**/*.png"), recursive=True)

@@ -63,16 +63,26 @@ class InterpolateDataset(Dataset):
 class InterpolateIntermediateDataset(InterpolateDataset):
     def __init__(self, h5py_file, test_size=0.1, is_train=True):
         super().__init__(h5py_file, test_size)
+        self.filenames_dict = np.load(
+            h5py_file.replace(".h5", "_filenames.npy"), allow_pickle=True
+        ).item()
+
         train_length = int(len(self.flow_images) * (1 - test_size))
 
         if is_train:
             self.flow_images = self.flow_images[:train_length]
             self.intermediate_flow_images = self.intermediate_flow_images[:train_length]
             self.target_flow_images = self.target_flow_images[:train_length]
+
+            for key in self.filenames_dict:
+                self.filenames_dict[key] = self.filenames_dict[key][:train_length]
         else:
             self.flow_images = self.flow_images[train_length:]
             self.intermediate_flow_images = self.intermediate_flow_images[train_length:]
             self.target_flow_images = self.target_flow_images[train_length:]
+
+            for key in self.filenames_dict.keys():
+                self.filenames_dict[key] = self.filenames_dict[key][train_length:]
 
 
 class AllTargetImageDataset(Dataset):
